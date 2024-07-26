@@ -47,16 +47,6 @@ const CONS: [u8; 9] = [0x43, 0x6F, 0x6E, 0x73, 0x74, 0x72, 0x75, 0x63, 0x74];
 const LAST: [u8; 14] = [0x4C, 0x45, 0x47, 0x45, 0x4E, 0x44, 0x41, 0x52, 0x59, 0x5F, 0x42, 0x4F, 0x53, 0x53];
 const FLOOR: [u8; 15] = [0x41, 0x56, 0x41, 0x5F, 0x54, 0x45, 0x4D, 0x50, 0x4C, 0x45, 0x5F, 0x45, 0x58, 0x49, 0x54];
 
-struct Targets {
-    kc: (u8, usize, usize),
-    bazi: (u8, usize, usize),
-    suic: (u8, usize, usize),
-    dq: (u8, usize, usize),
-    cons: (u8, usize, usize),
-    last: (u8, usize, usize),
-    floor: (u8, usize, usize),
-}
-
 enum Looking {
     ForLayer(String),
     ForBoss,
@@ -86,24 +76,9 @@ fn parse(text: &str) -> Vec<u8> {
 }
 
 fn process_find(numbers: Vec<u8>) -> Option<String> {
-    // 1. have an item
-    // 2. collect matches
-    // 3. update matches
-    // 4. update answers
 
     // resulting string
     let mut result = String::new();
-
-    /* search tracking
-    let mut looking_for: Targets = Targets {
-        kc: (KC[0], 0, KC.len()),
-        bazi: (BAZI[0], 0, BAZI.len()),
-        suic: (SUIC[0], 0, SUIC.len()),
-        dq: (DQ[0], 0, DQ.len()),
-        cons: (CONS[0], 0, CONS.len()),
-        last: (LAST[0], 0, LAST.len()),
-        floor: (FLOOR[0], 0, FLOOR.len()),
-    }; */
 
     /* 
     0 - KC
