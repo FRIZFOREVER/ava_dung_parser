@@ -100,7 +100,7 @@ fn process_find(numbers: Vec<u8>) -> Option<String> {
             CONS.len(), LAST.len(), FLOOR.len()
     ];
     let names: [String; 7] = [
-        String::from("KC"), String::from("Bassi"), String::from("Suic"), String("Dancepool"),
+        String::from("KC"), String::from("Bassi"), String::from("Suic"), String::from("Dancepool"),
         String::from("Cons"), String::from("Last"), String::from("Floor")
     ];
     let mut mode = Looking::ForBoss;
@@ -144,7 +144,7 @@ fn process_find(numbers: Vec<u8>) -> Option<String> {
             }
             // We are looking for chest
             Looking::ForLayer(boss_kind) => {
-                todo!("We found a boss !");
+                todo!("We found a boss, time to look for chest !");
             }
         }
     }
