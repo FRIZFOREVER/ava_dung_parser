@@ -113,40 +113,40 @@ fn process_find(numbers: Vec<u8>) -> Option<String> {
             // We are looking for boss
             Looking::ForBoss => {
                 // Iterating through current search query
+                println!("New char: {number}");
                 for (i, key) in next_char.iter().enumerate() {
                     // If we found a match
                     if number == key {
+                        println!("Match found: {:?}, {:?}, boss: {i}", &number, &key);
+                        println!("New stage is: {}", char_counter[i]+1);
                         // Add to the counter and look if it's overflow
                         char_counter[i] += 1;
-                        if char_counter[i] > max_counter[i] {
+                        if char_counter[i] == max_counter[i] {
+                            println!("Overflow on {i}");
                             // if overflow, then reset counter + update mode
-                            mode = Looking::ForLayer(names[i].copy());
+                            mode = Looking::ForLayer(names[i].clone());
                             char_counter[i] = 0;
                         }
                     } else { char_counter[i] = 0; }
                     // if match wasn't found, we reset counter to 0
-
-                    // update looking character regardless of what happened
-                    // since all changed were looked: found and not over, over and not found
-
-                    // hence I'm too lazy, we do match instead of binding `i` to bosses :p
-                    match i {
-                        0 => next_char[i] = KC[char_counter[i]],
-                        1 => next_char[i] = BAZI[char_counter[i]],
-                        2 => next_char[i] = SUIC[char_counter[i]],
-                        3 => next_char[i] = DQ[char_counter[i]],
-                        4 => next_char[i] = CONS[char_counter[i]],
-                        5 => next_char[i] = LAST[char_counter[i]],
-                        6 => next_char[i] = FLOOR[char_counter[i]],
-                        _ => panic!("we managed to overflow in boss matching :)")
-                    }
                 }
-            }
+                // after we iterated through every char, we need to update it accordingly
+                    next_char[0] = KC[char_counter[0]];
+                    next_char[1] = BAZI[char_counter[1]];
+                    next_char[2] = SUIC[char_counter[2]];
+                    next_char[3] = DQ[char_counter[3]];
+                    next_char[4] = CONS[char_counter[4]];
+                    next_char[5] = LAST[char_counter[5]];
+                    next_char[6] = FLOOR[char_counter[6]];
+            },
             // We are looking for chest
             Looking::ForLayer(boss_kind) => {
                 todo!("We found a boss, time to look for chest !");
+                // we need to look for "layer_x" pattern
+                // where x is the number, that we will get and parse according to boss kind
+                // after we find it
             }
         }
     }
-    result;
+    Some(result)
 }
