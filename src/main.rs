@@ -74,7 +74,7 @@ fn parse(text: &str) -> Vec<u8> {
     let item_vector: Vec<u8> = text.split_whitespace()
         .map(|s| hex::decode(s).unwrap()[0])
         .collect();
-    print!("{:?}, {:?}", item_vector, item_vector.len());
+    print!("{:?}, {:?}, \n", item_vector, item_vector.len());
     item_vector
 }
 
@@ -112,7 +112,7 @@ fn process_find(numbers: Vec<u8>) -> Option<String> {
 
     let mut boss_kind: String = String::from("Unknown_Boss");
     let mut mode = Looking::ForBoss;
-
+    let mut first_digit: char = '0';
     // main loop starts here
     // We look in boss mode first, then look for layer depending on string value
     // then we append result of layer looking to the string inside and add it to result
@@ -121,7 +121,7 @@ fn process_find(numbers: Vec<u8>) -> Option<String> {
             // We are looking for boss
             Looking::ForBoss => {
                 // Iterating through current search query
-                println!("New char: {number}");
+                println!("New char: {number}, ~~{}~~", char::from(*number));
                 for (i, key) in next_char.iter().enumerate() {
                     // If we found a match
                     if number == key {
@@ -134,6 +134,7 @@ fn process_find(numbers: Vec<u8>) -> Option<String> {
                             // if overflow, then reset counter + update mode
                             mode = Looking::ForLayer;
                             boss_kind = names[i].clone();
+                            println!("~~~~~~~ We found a boss ~~~~~~~");
                             // if overflow on Floor => append and end
                             if i == 6 {
                                 result += "Floor";
@@ -155,58 +156,71 @@ fn process_find(numbers: Vec<u8>) -> Option<String> {
             },
             // We are looking for chest
             Looking::ForLayer => {
+                println!("New char: {number}, ~~{}~~", char::from(*number));
                 // todo!("We found a boss, time to look for chest !");
                 // we need to look for "layer_x" pattern
                 // where x is the number, that we will get and parse according to boss kind
-                let mut first_digit: u8 = 0;
-                let second_digit: u8;
+                let second_digit: char;
                 if layer == 7 {
-                    second_digit = number.clone();
-                    chest_confirm(
+                    second_digit = char::from(*number);
+                    let chest_found = chest_confirm(
                         first_digit,
                         second_digit,
                         &boss_kind
                     );
+                    println!("{chest_found}");
+                    result += &format!("{chest_found}\n");
+                    layer = 0;
+                    mode = Looking::ForBoss;
+                    if boss_kind == "Last" {
+                        println!("{result}");
+                        return Some(result)
+                    }
                 }
-                if *number == LAYER[layer] || layer == 6 {
+                if layer == 6 {
+                    layer +=1;
+                }
+                else if *number == LAYER[layer] {
                     layer += 1;
                 }
                 else {
                     layer = 0;
                 }
-                first_digit = number.clone();
+                first_digit = char::from(*number);
 
             } // end of last match arm
         } //end of match
     } // end of mainloop
+    println!("{result}");
     Some(result)
 }
 
-fn chest_confirm (first_digit: u8, second_digit: u8, boss_kind: &String) -> String {
+fn chest_confirm (first_digit: char, second_digit: char, boss_kind: &String) -> String {
+    println!("{first_digit}, {second_digit}");
     match boss_kind.as_str() {
-        "DQ" | "Suic" | "KC" | "Bazi" => {
+        "DQ" | "Suic" | "KC" | "Bassi" => {
             match (first_digit, second_digit) {
-                (0, 8) => format!("{boss_kind} - 2 Gold\n"),
-                (0, 9) => format!("{boss_kind} - 1 Gold\n"),
-                (1, 0) => format!("{boss_kind} - 2 Purpl\n"),
-                (1, 1) => format!("{boss_kind} - 1 Purpl\n"),
+                ('0', '8') => format!("{boss_kind} - 2 Gold\n"),
+                ('0', '9') => format!("{boss_kind} - 1 Gold\n"),
+                ('1', '0') => format!("{boss_kind} - 2 Purpl\n"),
+                ('1', '1') => format!("{boss_kind} - 1 Purpl\n"),
                 _ => panic!("DQ / Suic and 2 more: wrong layer found")
             }
         },
         "Cons" => {
             match (first_digit, second_digit) {
-                (0, 6) => format!("{boss_kind} - 2 Gold\n"),
-                (0, 7) => format!("{boss_kind} - 1 Gold\n"),
-                (0, 8) => format!("{boss_kind} - 2 Purpl\n"),
-                (0, 9) => format!("{boss_kind} - 1 Purpl\n"),
+                ('0', '6') => format!("{boss_kind} - 2 Gold\n"),
+                ('0', '7') => format!("{boss_kind} - 1 Gold\n"),
+                ('0', '8') => format!("{boss_kind} - 2 Purpl\n"),
+                ('0', '9') => format!("{boss_kind} - 1 Purpl\n"),
                 _ => panic!("Cons: wrong layer found")
             }
         },
         "Last" => {
             match (first_digit, second_digit) {
-                (0, 2) => format!("{boss_kind} - 2 Gold\n"), 
-                (0, 4) => format!("{boss_kind} - 1 Gold\n"),
-                (0, 5) => format!("{boss_kind} - 2 Purpl\n"),
+                ('0', '2') => format!("{boss_kind} - 2 Gold\n"), 
+                ('0', '4') => format!("{boss_kind} - 1 Gold\n"),
+                ('0', '5') => format!("{boss_kind} - 2 Purpl\n"),
                 _ => panic!("Last: wrong layer found")
             }
         },
