@@ -46,7 +46,7 @@ const DQ: [u8; 9] = [0x41, 0x72, 0x63, 0x68, 0x2D, 0x4D, 0x61, 0x67, 0x65];
 const CONS: [u8; 9] = [0x43, 0x6F, 0x6E, 0x73, 0x74, 0x72, 0x75, 0x63, 0x74];
 const LAST: [u8; 14] = [0x4C, 0x45, 0x47, 0x45, 0x4E, 0x44, 0x41, 0x52, 0x59, 0x5F, 0x42, 0x4F, 0x53, 0x53];
 const FLOOR: [u8; 15] = [0x41, 0x56, 0x41, 0x5F, 0x54, 0x45, 0x4D, 0x50, 0x4C, 0x45, 0x5F, 0x45, 0x58, 0x49, 0x54];
-
+const LAYER: [u8; 6] = [0x4C, 0x61, 0x79, 0x65, 0x72, 0x5F];
 enum Looking {
     ForLayer(String),
     ForBoss,
@@ -100,9 +100,12 @@ fn process_find(numbers: Vec<u8>) -> Option<String> {
             CONS.len(), LAST.len(), FLOOR.len()
     ];
     let names: [String; 7] = [
-        String::from("KC"), String::from("Bassi"), String::from("Suic"), String::from("Dancepool"),
+        String::from("KC"), String::from("Bassi"), String::from("Suic"), String::from("DQ"),
         String::from("Cons"), String::from("Last"), String::from("Floor")
     ];
+
+    let mut layer: usize = 0;
+
     let mut mode = Looking::ForBoss;
 
     // main loop starts here
@@ -125,6 +128,11 @@ fn process_find(numbers: Vec<u8>) -> Option<String> {
                             println!("Overflow on {i}");
                             // if overflow, then reset counter + update mode
                             mode = Looking::ForLayer(names[i].clone());
+                            // if overflow on Floor => append and end
+                            if i == 6 {
+                                result += "Floor";
+                                result
+                            }
                             char_counter[i] = 0;
                         }
                     } else { char_counter[i] = 0; }
@@ -141,12 +149,56 @@ fn process_find(numbers: Vec<u8>) -> Option<String> {
             },
             // We are looking for chest
             Looking::ForLayer(boss_kind) => {
-                todo!("We found a boss, time to look for chest !");
+                // todo!("We found a boss, time to look for chest !");
                 // we need to look for "layer_x" pattern
                 // where x is the number, that we will get and parse according to boss kind
                 // after we find it
+                match layer {
+                    // we found it ! and it's already the number being processed
+                    6 => {
+                        let first_digit = number.clone();
+                        layer += 1;
+                    }
+                    // recording 2nd digit and finishing with appending
+                    7 => {
+                        let second_digit = number.clone();
+                        result += &chest_confirm(first_digit, second_digit, boss_kind);
+                    }
+                }
             }
         }
     }
     Some(result)
+}
+
+fn chest_confirm (first_digit: u8, second_digit: u8, boss_kind: String) -> String {
+    match &boss_kind {
+        "DQ" | "Suic" | "KC" | "Bazi" => {
+            match (first_digit, second_digit) {
+                (0, 8) => format!("{boss_kind} - 2 Gold\n"),
+                (0, 9) => format!("{boss_kind} - 1 Gold\n"),
+                (1, 0) => format!("{boss_kind} - 2 Purpl\n"),
+                (1, 1) => format!("{boss_kind} - 1 Purpl\n"),
+                _ => panic!("DQ / Suic and 2 more: wrong layer found")
+            }
+        },
+        "Cons" => {
+            match (first_digit, second_digit) {
+                (0, 6) => format!("{boss_kind} - 2 Gold\n"),
+                (0, 7) => format!("{boss_kind} - 1 Gold\n"),
+                (0, 8) => format!("{boss_kind} - 2 Purpl\n"),
+                (0, 9) => format!("{boss_kind} - 1 Purpl\n"),
+                _ => panic!("Cons: wrong layer found")
+            }
+        },
+        "Last" => {
+            match (first_digit, second_digit) {
+                (0, 2) => format!("{boss_kind} - 2 Gold\n"), 
+                (0, 4) => format!("{boss_kind} - 1 Gold\n"),
+                (0, 5) => format!("{boss_kind} - 2 Purpl\n"),
+                _ => panic!("Last: wrong layer found")
+            }
+        },
+        _ => panic!("unknown boss"),
+    }
 }
