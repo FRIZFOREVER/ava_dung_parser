@@ -173,6 +173,7 @@ fn process_find(numbers: Vec<u8>) -> Option<String> {
                     layer = 0;
                     mode = Looking::ForBoss;
                     if boss_kind == "Last" {
+                        println!("Final result:");
                         println!("{result}");
                         return Some(result)
                     }
