@@ -165,9 +165,9 @@ fn process_find(numbers: Vec<u8>) -> Option<String> {
                         result += &chest_confirm(first_digit, second_digit, boss_kind);
                     }
                 }
-            }
-        }
-    }
+            } // end of last match arm
+        } //end of match
+    } // end of mainloop
     Some(result)
 }
 
