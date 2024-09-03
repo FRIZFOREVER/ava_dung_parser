@@ -22,6 +22,9 @@ slint::slint!{
             x: 275px;
             y: 10px;
         }
+        erase_button := Button {
+            text: "Erase";
+        }
         Text {
             height: 250px;
             width: 250px;
@@ -48,7 +51,7 @@ const LAST: [u8; 14] = [0x4C, 0x45, 0x47, 0x45, 0x4E, 0x44, 0x41, 0x52, 0x59, 0x
 const FLOOR: [u8; 15] = [0x41, 0x56, 0x41, 0x5F, 0x54, 0x45, 0x4D, 0x50, 0x4C, 0x45, 0x5F, 0x45, 0x58, 0x49, 0x54];
 const LAYER: [u8; 6] = [0x4C, 0x61, 0x79, 0x65, 0x72, 0x5F];
 enum Looking {
-    ForLayer(String),
+    ForLayer,
     ForBoss,
 }
 
@@ -100,12 +103,14 @@ fn process_find(numbers: Vec<u8>) -> Option<String> {
             CONS.len(), LAST.len(), FLOOR.len()
     ];
     let names: [String; 7] = [
-        String::from("KC"), String::from("Bassi"), String::from("Suic"), String::from("DQ"),
+        String::from("KC"), String::from("Bassi"), String::from("Suic"),
+        String::from("DQ"),
         String::from("Cons"), String::from("Last"), String::from("Floor")
     ];
 
     let mut layer: usize = 0;
 
+    let mut boss_kind: String = String::from("Unknown_Boss");
     let mut mode = Looking::ForBoss;
 
     // main loop starts here
@@ -127,11 +132,12 @@ fn process_find(numbers: Vec<u8>) -> Option<String> {
                         if char_counter[i] == max_counter[i] {
                             println!("Overflow on {i}");
                             // if overflow, then reset counter + update mode
-                            mode = Looking::ForLayer(names[i].clone());
+                            mode = Looking::ForLayer;
+                            boss_kind = names[i].clone();
                             // if overflow on Floor => append and end
                             if i == 6 {
                                 result += "Floor";
-                                result
+                                return Some(result)
                             }
                             char_counter[i] = 0;
                         }
@@ -148,31 +154,36 @@ fn process_find(numbers: Vec<u8>) -> Option<String> {
                     next_char[6] = FLOOR[char_counter[6]];
             },
             // We are looking for chest
-            Looking::ForLayer(boss_kind) => {
+            Looking::ForLayer => {
                 // todo!("We found a boss, time to look for chest !");
                 // we need to look for "layer_x" pattern
                 // where x is the number, that we will get and parse according to boss kind
-                // after we find it
-                match layer {
-                    // we found it ! and it's already the number being processed
-                    6 => {
-                        let first_digit = number.clone();
-                        layer += 1;
-                    }
-                    // recording 2nd digit and finishing with appending
-                    7 => {
-                        let second_digit = number.clone();
-                        result += &chest_confirm(first_digit, second_digit, boss_kind);
-                    }
+                let mut first_digit: u8 = 0;
+                let second_digit: u8;
+                if layer == 7 {
+                    second_digit = number.clone();
+                    chest_confirm(
+                        first_digit,
+                        second_digit,
+                        &boss_kind
+                    );
                 }
+                if *number == LAYER[layer] || layer == 6 {
+                    layer += 1;
+                }
+                else {
+                    layer = 0;
+                }
+                first_digit = number.clone();
+
             } // end of last match arm
         } //end of match
     } // end of mainloop
     Some(result)
 }
 
-fn chest_confirm (first_digit: u8, second_digit: u8, boss_kind: String) -> String {
-    match &boss_kind {
+fn chest_confirm (first_digit: u8, second_digit: u8, boss_kind: &String) -> String {
+    match boss_kind.as_str() {
         "DQ" | "Suic" | "KC" | "Bazi" => {
             match (first_digit, second_digit) {
                 (0, 8) => format!("{boss_kind} - 2 Gold\n"),
