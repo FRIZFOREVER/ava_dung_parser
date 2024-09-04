@@ -64,8 +64,8 @@ fn main() -> Result<(), slint::PlatformError>{
         let numbers = parse(&text);
         let in_string = process_find(numbers);
     });
-    let test_text = "0B 23 08 22";
-    parse(&test_text);
+    // let test_text = "0B 23 08 22";
+    // parse(&test_text);
     app.run()?;
     Ok(())
 }
