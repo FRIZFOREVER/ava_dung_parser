@@ -156,7 +156,7 @@ fn process_find(numbers: Vec<u8>) -> Option<String> {
             },
             // We are looking for chest
             Looking::ForLayer => {
-                println!("New char: {number}, ~~{}~~", char::from(*number));
+                println!("New char: {number}, ~{}~", char::from(*number));
                 // todo!("We found a boss, time to look for chest !");
                 // we need to look for "layer_x" pattern
                 // where x is the number, that we will get and parse according to boss kind
