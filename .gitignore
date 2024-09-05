@@ -1,3 +1,4 @@
 target/debug/*
 target/release/*
 !target/release/ava_dung_parser
+!target/release/ava_dung_parser.exe

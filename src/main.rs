@@ -1,12 +1,12 @@
 slint::slint!{
-    import { TextEdit, Button, VerticalBox } from "std-widgets.slint";
+    import { LineEdit, TextEdit, Button, VerticalBox } from "std-widgets.slint";
     export component App inherits Window {
-        out property<string> to_parse;
+        out property<string> to_parse: "0B 23 08 22";
         in property<string> parsed_string: "Parsing result will be here";
         callback parse <=> parse_button.clicked;
         height: 400px;
         width:  500px;
-        TextEdit { 
+        LineEdit {
             width:  200px;
             height: 380px;
             placeholder-text: "Paste here";
@@ -14,6 +14,7 @@ slint::slint!{
             y: 10px;
             edited(text) => {
                 to_parse = text;
+                debug(text);
             }
         }
         parse_button := Button { 
@@ -29,19 +30,18 @@ slint::slint!{
             x: 220px;
             y: 45px; 
             font-family: "Space Mono";
-            overflow: TextOverflow.elide;
+            // overflow: TextOverflow.elide;
             text <=> root.parsed_string;
-            wrap: TextWrap.word-wrap;
-            erase_button := Button {
-                text: "Erase";
-            }
+            // wrap: TextWrap.word-wrap;
+            // erase_button := Button {
+            //    text: "Erase";
+            //}
         }
     }
 }
 
 use std::usize;
 use slint::SharedString;
-
 use hex;
 
 const KC: [u8; 14] = [0x4B, 0x6E, 0x69, 0x67, 0x68, 0x74, 0x2D, 0x43, 
@@ -138,7 +138,7 @@ fn process_find(numbers: Vec<u8>) -> Option<String> {
                         char_counter[i] += 1;
                         if char_counter[i] == max_counter[i] {
                             println!("Overflow on {i}");
-                            // if overflow, then reset counter + update mode
+                            // if we overflow, then reset counter + update mode
                             mode = Looking::ForLayer;
                             boss_kind = names[i].clone();
                             println!("~~~~~~~ We found a boss ~~~~~~~");
